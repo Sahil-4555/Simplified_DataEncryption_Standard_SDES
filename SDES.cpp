@@ -98,7 +98,7 @@ vector<int> function_(vector<int> tmpp, vector<int> key__)
 
     int row, column, value;
     // using 1 and 4 bit of left_4bits_1 we find row
-    vector<int> vec = {left_4bits_1[0], left_4bits_1[1]};
+    vector<int> vec = {left_4bits_1[0], left_4bits_1[3]};
     row = BinaryToDecimal(vec);
     // using 2 and 3 bit of left_4bits_1 we find column
     vec = {left_4bits_1[1], left_4bits_1[2]};
@@ -108,7 +108,7 @@ vector<int> function_(vector<int> tmpp, vector<int> key__)
     string str_left = Binary__(value);
 
     // using 1 and 4 bit of left_4bits_1 we find row
-    vec = {right_4bits_1[0], right_4bits_1[1]};
+    vec = {right_4bits_1[0], right_4bits_1[3]};
     row = BinaryToDecimal(vec);
     // using 2 and 3 bit of left_4bits_1 we find column
     vec = {right_4bits_1[1], right_4bits_1[2]};
