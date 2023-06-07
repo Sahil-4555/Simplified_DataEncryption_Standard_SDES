@@ -1,7 +1,12 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define ll long long
+#define FAST                     \
+    ios::sync_with_stdio(false); \
+    cin.tie(NULL);               \
+    cout.tie(NULL);
 
+// Permutation Tables and S-Boxes
 vector<int> PermutationP10 = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
 vector<int> PermutationP8 = {6, 3, 7, 4, 8, 5, 10, 9};
 vector<int> Initial_Permutation_IP = {2, 6, 3, 1, 4, 8, 5, 7};
@@ -11,8 +16,10 @@ vector<int> Inverse_of_Inital_Permuation_IP_inv = {4, 1, 3, 5, 7, 2, 8, 6};
 vector<vector<int>> S_Box_0 = {{1, 0, 3, 2}, {3, 2, 1, 0}, {0, 2, 1, 3}, {3, 1, 3, 2}};
 vector<vector<int>> S_Box_1 = {{0, 1, 2, 3}, {2, 0, 1, 3}, {3, 0, 1, 0}, {2, 1, 0, 3}};
 
+// Variables to store generated 8-bit keys
 vector<int> key1_8bits(8), key2_8bits(8);
 
+// Function to convert a decimal value to a binary string
 string Binary__(int value)
 {
     if (value == 0)
@@ -33,6 +40,7 @@ string Binary__(int value)
     }
 }
 
+// Function to swap the bits of a given array
 vector<int> swap_bits(vector<int> arr, int sizes)
 {
     vector<int> left(sizes), right(sizes);
@@ -54,6 +62,7 @@ vector<int> swap_bits(vector<int> arr, int sizes)
     return output;
 }
 
+// Function to convert a binary vector to decimal
 int BinaryToDecimal(vector<int> vec)
 {
     int base = 1, decimal_value = 0;
@@ -66,6 +75,7 @@ int BinaryToDecimal(vector<int> vec)
     return decimal_value;
 }
 
+// Function implementing the round function
 vector<int> function_(vector<int> tmpp, vector<int> key__)
 {
     vector<int> left_4bits(4), right_4bits(4);
@@ -78,11 +88,13 @@ vector<int> function_(vector<int> tmpp, vector<int> key__)
 
     vector<int> ep(8);
 
+    // Expand and permute the right 4 bits
     for (int i = 0; i < 8; i++)
     {
         ep[i] = right_4bits[Expanded_Permutation_EP[i] - 1];
     }
 
+    // XOR the expanded and permuted bits with the key
     for (int i = 0; i < 8; i++)
     {
         tmpp[i] = key__[i] ^ ep[i];
@@ -97,23 +109,28 @@ vector<int> function_(vector<int> tmpp, vector<int> key__)
     }
 
     int row, column, value;
+
     // using 1 and 4 bit of left_4bits_1 we find row
     vector<int> vec = {left_4bits_1[0], left_4bits_1[3]};
     row = BinaryToDecimal(vec);
+
     // using 2 and 3 bit of left_4bits_1 we find column
     vec = {left_4bits_1[1], left_4bits_1[2]};
     column = BinaryToDecimal(vec);
-    // value at row and column
+
+    // Find the value at the row and column of S-Box 0
     value = S_Box_0[row][column];
     string str_left = Binary__(value);
 
     // using 1 and 4 bit of left_4bits_1 we find row
     vec = {right_4bits_1[0], right_4bits_1[3]};
     row = BinaryToDecimal(vec);
+
     // using 2 and 3 bit of left_4bits_1 we find column
     vec = {right_4bits_1[1], right_4bits_1[2]};
     column = BinaryToDecimal(vec);
-    // value at row and column
+
+    // Find the value at the row and column of S-Box 1
     value = S_Box_1[row][column];
     string str_right = Binary__(value);
 
@@ -125,11 +142,14 @@ vector<int> function_(vector<int> tmpp, vector<int> key__)
     }
 
     vector<int> r_p4(4);
+
+    // Perform permutation P4 on the obtained 4 bits
     for (int i = 0; i < 4; i++)
     {
         r_p4[i] = r_[PermutationP4[i] - 1];
     }
 
+    // XOR the left 4 bits with the permuted 4 bits
     for (int i = 0; i < 4; i++)
     {
         left_4bits[i] = left_4bits[i] ^ r_p4[i];
@@ -137,6 +157,7 @@ vector<int> function_(vector<int> tmpp, vector<int> key__)
 
     vector<int> output_8bits(8);
 
+    // Combine the left 4 bits and right 4 bits to get the output
     for (int i = 0; i < 4; i++)
     {
         output_8bits[i] = left_4bits[i];
@@ -146,23 +167,29 @@ vector<int> function_(vector<int> tmpp, vector<int> key__)
     return output_8bits;
 }
 
+// Function for the decryption of the ciphertext
 vector<int> DecryptionOfCipherText(vector<int> CipherTextBinary)
 {
     vector<int> tmp(8);
 
+    // Perform initial permutation on the ciphertext
     for (int i = 0; i < 8; i++)
     {
         tmp[i] = CipherTextBinary[Initial_Permutation_IP[i] - 1];
     }
 
+    // Perform the round function with key2
     vector<int> arr1 = function_(tmp, key2_8bits);
 
+    // Swap the left and right 4 bits
     vector<int> after_swap = swap_bits(arr1, arr1.size() / 2);
 
+    // Perform the round function with key1
     vector<int> arr2 = function_(after_swap, key1_8bits);
 
     vector<int> decrypted(8);
 
+    // Perform the inverse initial permutation
     for (int i = 0; i < 8; i++)
     {
         decrypted[i] = arr2[Inverse_of_Inital_Permuation_IP_inv[i] - 1];
@@ -171,22 +198,29 @@ vector<int> DecryptionOfCipherText(vector<int> CipherTextBinary)
     return decrypted;
 }
 
+// Function for the encryption of the plaintext
 vector<int> EncryptionOfPlainText(vector<int> PlainTextBinary)
 {
     vector<int> tmp(8);
+
+    // Perform initial permutation on the plaintext
     for (int i = 0; i < PlainTextBinary.size(); i++)
     {
         tmp[i] = PlainTextBinary[Initial_Permutation_IP[i] - 1];
     }
 
+    // Perform the round function with key1
     vector<int> arr1 = function_(tmp, key1_8bits);
 
+    // Swap the left and right 4 bits
     vector<int> after_swap = swap_bits(arr1, arr1.size() / 2);
 
+    // Perform the round function with key2
     vector<int> arr2 = function_(after_swap, key2_8bits);
 
     vector<int> cipherText_8bits(8);
 
+    // Perform the inverse initial permutation
     for (int i = 0; i < 8; i++)
     {
         cipherText_8bits[i] = arr2[Inverse_of_Inital_Permuation_IP_inv[i] - 1];
@@ -195,6 +229,7 @@ vector<int> EncryptionOfPlainText(vector<int> PlainTextBinary)
     return cipherText_8bits;
 }
 
+// Function to convert a decimal number to binary
 vector<int> DecimalToBinary(int Decimal)
 {
     vector<int> binaryNum(8, 0);
@@ -211,6 +246,7 @@ vector<int> DecimalToBinary(int Decimal)
     return binaryNum;
 }
 
+// Function to perform left circular shift on a binary vector
 vector<int> shift(vector<int> binary, int n)
 {
     while (n > 0)
@@ -227,10 +263,12 @@ vector<int> shift(vector<int> binary, int n)
     return binary;
 }
 
+// Function for key generation
 void key_geneartion(vector<int> key_10bit)
 {
     vector<int> key_(10);
 
+    // Perform initial permutation on the 10-bit key
     for (int i = 0; i < 10; i++)
     {
         key_[i] = key_10bit[PermutationP10[i] - 1];
@@ -283,6 +321,8 @@ void key_geneartion(vector<int> key_10bit)
     {
         cout << itr;
     }
+    cout<<endl;
+
 }
 
 vector<int> generateRandomKey(int sizeOfKey)
@@ -300,30 +340,9 @@ vector<int> generateRandomKey(int sizeOfKey)
 
 void solve()
 {
-    /*
-    the plaintext should be 8 bit long only no greater then that
-    11111111 = 255
-    */
-    int plaintext;
-    cin >> plaintext;
-    if (plaintext > 255)
-    {
-        cout << "The PlainText Not Should be Greater then 8-Bits" << endl;
-        exit(0);
-    }
-
-    cout<<"The Entered Plain Text Is : "<<plaintext<<endl;
-    vector<int> BinaryOfPlainText = DecimalToBinary(plaintext);
-
-    cout<<"The Binary Value for Entered Plain Text Is : ";
-    for (auto itr : BinaryOfPlainText)
-    {
-        cout << itr;
-    }
-
-    cout << endl;
-
+    // This Will Generate the Random 10 Bit Key of '1' & '0'
     vector<int> key_10bit = generateRandomKey(10);
+
     cout << "Generated 10-Bit Key : ";
     for (auto itr : key_10bit)
     {
@@ -331,40 +350,51 @@ void solve()
     }
     cout << endl;
 
+    // Will Generate two keys K1 and K2 of 8 Bits for Two Rounds
     key_geneartion(key_10bit);
 
-    vector<int> CipherText_8Bits = EncryptionOfPlainText(BinaryOfPlainText);
+    // Enter Your Message for Encryption
+    cout <<"Enter Message: "<<endl;
+    string plaintext;
+    getline(cin, plaintext);
 
-    cout<< endl<< "The Cipher Text Generated For Plain Text Is : ";
-    for (auto itr : CipherText_8Bits)
+    // This Will Encrypt the Message to Cipher Text
+    vector<int> CipherText;
+    for (int i = 0; i < plaintext.length(); i++)
     {
-        cout << itr;
+        vector<int> BinaryOfPlainText = DecimalToBinary(plaintext[i] - 0);
+        vector<int> CipherText_8Bits = EncryptionOfPlainText(BinaryOfPlainText);
+        int ct = BinaryToDecimal(CipherText_8Bits);
+        CipherText.push_back(ct);
+    }
+
+    cout << "The Cipher Text Generated For Plain Text Is : ";
+    for (auto itr : CipherText)
+    {
+        cout << char(itr % 128);
     }
     cout << endl;
 
-    vector<int> Decrypted_8Bits = DecryptionOfCipherText(CipherText_8Bits);
-
-    cout 
-         << "The Binary Decryption of CipherText Is : ";
-    for (auto itr : Decrypted_8Bits)
+    // This Will Decrypt the Cipher Text to Message
+    string pt_;
+    for (int i = 0; i < CipherText.size(); i++)
     {
-        cout << itr;
+        vector<int> CipherText_8Bits = DecimalToBinary(CipherText[i]);
+        vector<int> Decrypted_8Bits = DecryptionOfCipherText(CipherText_8Bits);
+        pt_.push_back(BinaryToDecimal(Decrypted_8Bits));
     }
-    cout << endl;
-
-    plaintext = BinaryToDecimal(Decrypted_8Bits);
 
     cout << "The Decrpted PlainText Is : ";
-    cout << plaintext << endl;
+    cout << pt_ << endl;
 }
 
 int main()
 {
-
-#ifndef ONLINE_JUDGE
-    freopen("input", "r", stdin);
-    freopen("output", "w", stdout);
-#endif
+    FAST
+    // #ifndef ONLINE_JUDGE
+    //         freopen("input", "r", stdin);
+    //     freopen("output", "w", stdout);
+    // #endif
 
     solve();
 
